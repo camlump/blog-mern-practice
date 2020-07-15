@@ -8,7 +8,12 @@ const bodyParser = require('body-parser');
 
 const cookieParser = require('cookie-parser');
 
-mongoose.connect('mongodb+srv://Cameron:Akimbo96@react-blog.7wsyc.mongodb.net/Blog?retryWrites=true&w=majority', {
+const { User } = require('./models/user');
+
+
+const config = require('./config/key')
+
+mongoose.connect(config.mongoURI, {
     useNewUrlParser: true
 }).then(() =>console.log('DB connected')).catch(err => console.error(err));
 
@@ -21,7 +26,21 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 
+app.get('/', (req, res)=>{
+    res.json({"hello ~": "hi ~~ landflanf"})
+})
 
+
+app.post('/api/users/register',(req, res) =>{
+    const user = new User(req.body)
+
+    user.save((err, userData)=>{
+        if(err, doc) return res.json ({ success: false, err })
+    })
+    return res.status(200).json({
+        success: true
+    })
+});
 
 
 
