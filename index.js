@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
 const { User } = require('./models/user');
+const { auth } = require('./middleware/auth');
 
 
 const config = require('./config/key');
@@ -26,10 +27,21 @@ app.use(bodyParser.urlencoded({ extended : true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-
-app.get('/', (req, res)=>{
-    res.json({"hello ~": "hi ~~ landflanf"})
+app.get('/api/user/auth', auth, (req, res)=>{
+    res.status(200).json({
+        _id:req._id,
+        isAuth: true,
+        email:req.user.email,
+        name:req.user.name,
+        lastname: req.user.lastname,
+        role: req.user.role
+    })
 })
+
+
+// app.get('/', (req, res)=>{
+//     res.json({"hello ~": "hi ~~ landflanf"})
+// })
 
 
 app.post('/api/users/register',(req, res) =>{
@@ -53,23 +65,23 @@ app.post('/api/user/login', (req, res)=>{
             loginSuccess: false,
             message: "Auth failed, email not found"
         });
-    })
-    //compare the password
-    user.comparePassword(req.body.password, (err, isMatch)=>{
-        if(!isMatch) {
-            return res.json ({ loginSuccess: false, message: "wrong password"})
-        }
-    })
-    //generate the token
-    user.generateToken((err, user) =>{
-        if(err) return res.status(400).send(err);
-        res.cookie("x_auth", user.token)
-            .status(200)
-            .json({
-                loginSuccess: true
-            })
+        user.comparePassword(req.body.password, (err, isMatch)=>{
+            if(!isMatch){
+                return res.json ({ loginSuccess: false, message: "worng password"})
+            }
+        })
+       user.generateToken((err, user)=>{
+           if(err) return res. status(400).send(err);
+           res
+           .cookie("x_auth", user.token)
+           .status(200)
+           .json({
+               loginSuccess: true
+           })
+       })
 
     })
+  
 })
 
 

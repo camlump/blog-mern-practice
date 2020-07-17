@@ -22,7 +22,7 @@ const userSchema = mongoose.Schema({
 
     password: {
         type: String,
-        maxlength: 5
+        minglength: 5
     },
 
     lastname: {
@@ -47,7 +47,7 @@ const userSchema = mongoose.Schema({
 
 //Hash user model password
 userSchema.pre('save', function( next ) {
-    let user = this;
+   let user = this;
 
     if(user.isModified('password')) {
 
@@ -58,6 +58,7 @@ userSchema.pre('save', function( next ) {
                 if(err) return next(err);
     
                 user.password = hash
+                next ()
             })
         })
     } else {
@@ -76,12 +77,23 @@ userSchema.methods.comparePassword = function(plainPassword, cb){
 
 userSchema.methods.generateToken = function(cb) {
     let user = this;
-    let token = jwt.sign(user._id.toHexSring(), 'secret')
+    let token = jwt.sign(user._id.toHexString(), 'secret')
     user.token = token;
 
     user.save(function (err, user) {
         if(err) return cb(err)
         cb(null, user);
+    })
+}
+
+userSchema.statics.findByToken = function(token, cb) {
+    let user = this;
+
+    jwt.verify(token, 'secret', function( err, decode ){
+        user.findOne({"_id": decode, "token": token}, function (err, user){
+            if(err) return cb(err);
+            cb(null, user);
+        })
     })
 }
 
