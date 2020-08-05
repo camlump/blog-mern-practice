@@ -13,7 +13,7 @@ const { auth } = require('./middleware/auth');
 
 
 const config = require('./config/key');
-const user = require('./models/user');
+// const user = require('./models/user');
 
 mongoose.connect(config.mongoURI, {
     useNewUrlParser: true
@@ -67,7 +67,7 @@ app.post('/api/user/login', (req, res)=>{
         });
         user.comparePassword(req.body.password, (err, isMatch)=>{
             if(!isMatch){
-                return res.json ({ loginSuccess: false, message: "worng password"})
+                return res.json ({ loginSuccess: false, message: "wrong password"})
             }
         })
        user.generateToken((err, user)=>{
@@ -93,7 +93,9 @@ app.get('/api/user/logout', auth, (req, res)=>{
     })
 })
 
+const port = process.env.PORT || 5000
 
-
-app.listen(5000);
+app.listen(port, () => {
+    console.log(`server running at ${port}`)
+});
 
